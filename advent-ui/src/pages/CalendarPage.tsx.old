@@ -1,0 +1,106 @@
+import { useEffect, useState } from "react";
+import { api, type DoorCard } from "../api";
+import {
+  Box,
+  Grid,
+  Card,
+  CardActionArea,
+  CardContent,
+  CardMedia,
+  Typography,
+  Chip,
+  Stack,
+  Button,
+} from "@mui/material";
+import FestiveAppBar from "../components/FestiveAppBar";
+import Snowfall from "../components/Snowfall";
+import { useNavigate } from "react-router-dom";
+
+export default function CalendarPage() {
+  const [days, setDays] = useState<DoorCard[]>([]);
+  const nav = useNavigate();
+
+  useEffect(() => {
+    api.get<DoorCard[]>("/advent/days").then((r) => setDays(r.data));
+  }, []);
+
+  return (
+    <>
+      <FestiveAppBar />
+      <Snowfall density={90} speed={0.7} opacity={0.5} zIndex={0} />
+
+      <Box
+        sx={{
+          p: 3,
+          position: "relative",
+          zIndex: 1,
+          backgroundImage:
+            "radial-gradient(circle at 10% 10%, rgba(255,255,255,0.7) 0, transparent 40%), radial-gradient(circle at 90% 20%, rgba(255,0,0,0.08) 0, transparent 35%)",
+        }}
+      >
+        <Typography variant="h4" gutterBottom fontWeight={700}>
+          Jeden Tag ein Türchen – Frohe Weihnachten! 🎁
+        </Typography>
+        <Grid container spacing={2}>
+          {days.map((d) => (
+            <Grid key={d.day} item xs={12} sm={6} md={4} lg={3}>
+              <Card
+                sx={{
+                  border: "2px solid #c62828",
+                  background: d.unlocked
+                    ? "linear-gradient(180deg,#fff,#fff5f5)"
+                    : "linear-gradient(180deg,#fafafa,#f0f0f0)",
+                  boxShadow: d.unlocked
+                    ? "0 0 12px rgba(27,94,32,0.35)"
+                    : "none",
+                  transition: "box-shadow .3s ease",
+                }}
+              >
+                <CardActionArea
+                  disabled={!d.unlocked}
+                  onClick={() => nav(`/door/${d.day}`)}
+                >
+                  {d.imageUrl && (
+                    <CardMedia
+                      component="img"
+                      height="160"
+                      image={d.imageUrl}
+                      alt={`Door ${d.day}`}
+                      sx={{ objectFit: "contain", p: 2, background: "#fff" }}
+                    />
+                  )}
+                  <CardContent>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography variant="h6" fontWeight={700}>
+                        Tür {d.day}
+                      </Typography>
+                      <Chip
+                        color={d.unlocked ? "secondary" : "default"}
+                        label={d.unlocked ? "Freigeschaltet" : "Gesperrt"}
+                        size="small"
+                      />
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary" mt={1}>
+                      {new Date(d.date).toLocaleDateString("de-DE")}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+                {!d.unlocked && (
+                  <Box sx={{ p: 1, textAlign: "center" }}>
+                    <Button size="small" disabled>
+                      Wartet auf den großen Tag ✨
+                    </Button>
+                  </Box>
+                )}
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    </>
+  );
+}
