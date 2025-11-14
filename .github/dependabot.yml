@@ -1,0 +1,61 @@
+version: 2
+
+updates:
+  # 1️⃣ Maven (Kotlin + Spring Boot Backend)
+  - package-ecosystem: "maven"
+    directory: "/"                # pom.xml liegt im Repo-Root
+    schedule:
+      interval: "weekly"          # z.B. jeden Montag
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "backend"
+    # Optional: Abhängigkeiten gruppieren
+    groups:
+      spring-and-kotlin:
+        patterns:
+          - "org.springframework.*"
+          - "org.springframework.boot:*"
+          - "org.jetbrains.kotlin:*"
+      jackson:
+        patterns:
+          - "tools.jackson.*"
+          - "com.fasterxml.jackson.*"
+
+  # 2️⃣ npm (React + Vite Frontend im Ordner advent-ui)
+  - package-ecosystem: "npm"
+    directory: "/advent-ui"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:30"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "frontend"
+    # Optional: Frontend-Libraries gruppieren
+    groups:
+      react-and-vite:
+        patterns:
+          - "react"
+          - "react-*"
+          - "vite"
+          - "@vitejs/*"
+
+  # 3️⃣ GitHub Actions (CI-Workflows)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci"
+
