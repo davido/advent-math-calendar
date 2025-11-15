@@ -1,21 +1,41 @@
 import { useEffect, useRef } from "react";
 
+type SnowfallProps = {
+  density?: number;  // Basis-Anzahl Flocken (wird auf 2 Layer verteilt)
+  speed?: number;    // Basisgeschwindigkeit
+  opacity?: number;  // Maximal-Deckkraft
+  zIndex?: number;
+};
+
+type Flake = {
+  x: number;
+  y: number;
+  r: number;              // "Größe" der Flocke
+  vx: number;
+  vy: number;
+  a: number;              // Phase für horizontales Wackeln
+  aa: number;             // Winkel-Geschwindigkeit
+  alpha: number;          // individuelle Deckkraft
+  layer: 0 | 1;           // 0 = Hintergrund, 1 = Vordergrund
+  rot: number;            // Rotation
+  rotSpeed: number;       // Rotationsgeschwindigkeit
+};
+
 export default function Snowfall({
   density = 80,
   speed = 0.6,
-  opacity = 0.6,
-  zIndex = 0,
-}: {
-  density?: number;
-  speed?: number;
-  opacity?: number;
-  zIndex?: number;
-}) {
+  opacity = 0.9,
+  zIndex = 9999,
+}: SnowfallProps) {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    const canvas = ref.current!;
-    const ctx = canvas.getContext("2d")!;
+    const canvas = ref.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
     let w = (canvas.width = window.innerWidth);
     let h = (canvas.height = window.innerHeight);
 
@@ -25,50 +45,111 @@ export default function Snowfall({
     };
     window.addEventListener("resize", onResize);
 
-    type Flake = {
-      x: number;
-      y: number;
-      r: number;
-      vx: number;
-      vy: number;
-      a: number;
-      aa: number;
-    };
-    const flakes: Flake[] = Array.from({ length: density }).map(() => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: Math.random() * 2.2 + 0.8,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: Math.random() * speed + 0.3,
-      a: Math.random() * Math.PI * 2,
-      aa: Math.random() * 0.02 + 0.005,
-    }));
+    const totalFlakes = density * 2; // 2 Layer
+    const flakes: Flake[] = [];
 
-    let raf = 0;
-    const tick = () => {
-      ctx.clearRect(0, 0, w, h);
-      ctx.globalAlpha = opacity;
-      ctx.fillStyle = "#fff";
+    for (let i = 0; i < totalFlakes; i++) {
+      const layer: 0 | 1 = i < density ? 0 : 1; // erste Hälfte: Hintergrund, zweite: Vordergrund
+      const baseSize = layer === 0 ? 1.2 : 2.5; // Hintergrund kleiner
+      const sizeSpread = layer === 0 ? 1.2 : 3.0;
 
-      for (const f of flakes) {
-        f.a += f.aa;
-        f.x += f.vx + Math.cos(f.a) * 0.2;
-        f.y += f.vy;
+      const r = Math.random() * sizeSpread + baseSize;
 
-        if (f.x < -5) f.x = w + 5;
-        if (f.x > w + 5) f.x = -5;
-        if (f.y > h + 5) {
-          f.y = -5;
-          f.x = Math.random() * w;
-        }
+      flakes.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r,
+        vx: (Math.random() - 0.5) * (layer === 0 ? 0.2 : 0.5),
+        vy: (Math.random() * speed + 0.2) * (layer === 0 ? 0.5 : 1.0),
+        a: Math.random() * Math.PI * 2,
+        aa: Math.random() * 0.015 + 0.003,
+        alpha:
+          (Math.random() * (opacity - 0.3) + 0.3) *
+          (layer === 0 ? 0.7 : 1.0), // Hintergrund etwas transparenter
+        layer,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.01,
+      });
+    }
 
-        ctx.beginPath();
-        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-        ctx.fill();
+    // Hilfsfunktion: eine ❄ zeichnen
+    const drawSnowflake = (flake: Flake) => {
+      const { x, y, r, rot } = flake;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+
+      ctx.beginPath();
+      // 6 "Arme" im Kreis
+      const arms = 6;
+      for (let i = 0; i < arms; i++) {
+        // Hauptarm
+        ctx.moveTo(0, 0);
+        ctx.lineTo(r, 0);
+
+        // kleine Seitenäste
+        const branchStart = r * 0.4;
+        const branchEnd = r * 0.75;
+
+        ctx.moveTo(branchStart, 0);
+        ctx.lineTo(branchEnd, r * 0.3);
+
+        ctx.moveTo(branchStart, 0);
+        ctx.lineTo(branchEnd, -r * 0.3);
+
+        ctx.rotate((Math.PI * 2) / arms);
       }
 
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    let raf = 0;
+
+    const tick = () => {
+      ctx.clearRect(0, 0, w, h);
+
+      // Hintergrund etwas weicher zeichnen, Vordergrund kräftiger
+      for (const layer of [0, 1] as const) {
+        if (layer === 0) {
+          ctx.lineWidth = 1;
+          ctx.shadowBlur = 2;
+        } else {
+          ctx.lineWidth = 1.4;
+          ctx.shadowBlur = 4;
+        }
+        ctx.strokeStyle = "#ffffff";
+        ctx.shadowColor = "rgba(255,255,255,0.9)";
+
+        for (const f of flakes) {
+          if (f.layer !== layer) continue;
+
+          // Bewegung aktualisieren
+          f.a += f.aa;
+          f.rot += f.rotSpeed;
+
+          f.x += f.vx + Math.cos(f.a) * 0.4 * (layer === 0 ? 0.6 : 1.0);
+          f.y += f.vy;
+
+          // Wrap-around
+          const margin = 20;
+          if (f.x < -margin) f.x = w + margin;
+          if (f.x > w + margin) f.x = -margin;
+          if (f.y > h + margin) {
+            f.y = -margin;
+            f.x = Math.random() * w;
+          }
+
+          ctx.globalAlpha = f.alpha;
+          drawSnowflake(f);
+        }
+      }
+
+      ctx.globalAlpha = 1;
       raf = requestAnimationFrame(tick);
     };
+
     raf = requestAnimationFrame(tick);
 
     return () => {

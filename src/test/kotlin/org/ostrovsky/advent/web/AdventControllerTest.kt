@@ -27,8 +27,8 @@ class AdventControllerTest
         private val mockMvc: MockMvc,
         private val jsonMapper: JsonMapper,
         private val env: Environment,
-    ) {        
-private fun currentDateForTest(): LocalDate {
+    ) {
+        private fun currentDateForTest(): LocalDate {
             val fixed = env.getProperty("advent.fixed-today")
             return if (!fixed.isNullOrBlank()) {
                 LocalDate.parse(fixed)
@@ -192,7 +192,12 @@ private fun currentDateForTest(): LocalDate {
             // Gibt es ein error-Feld?
             if (body.contains("\"error\"")) {
                 val node = jsonMapper.readTree(body)
-                assertEquals("locked", node["error"].asText(), "Tag 1 darf nur 'locked' als Fehler haben")
+                val errorText = node.path("error").textValue()
+                assertEquals(
+                    "locked",
+                    errorText,
+                    "Tag 1 darf nur 'locked' als Fehler haben",
+                )
             } else {
                 // Dann muss es ein valides AdventDayDto sein
                 val dto: AdventDayDto = jsonMapper.readValue(body)

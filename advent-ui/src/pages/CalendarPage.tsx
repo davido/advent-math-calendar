@@ -27,7 +27,6 @@ export default function CalendarPage() {
   return (
     <>
       <FestiveAppBar />
-      <Snowfall density={90} speed={0.7} opacity={0.5} zIndex={0} />
 
       <Box
         sx={{
@@ -145,6 +144,7 @@ export default function CalendarPage() {
           })}
         </Grid>
       </Box>
+      <Snowfall density={90} speed={0.7} opacity={0.9} zIndex={9999} />
     </>
   );
 }
