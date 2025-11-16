@@ -184,18 +184,6 @@
         </executions>
       </plugin>
 
-      <!-- Spring Boot Repackage -->
-      <!--
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals><goal>repackage</goal></goals>
-                    </execution>
-                </executions>
-            </plugin>
--->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -207,7 +195,7 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.43.0</version>
+        <version>3.0.0</version>
 
         <configuration>
           <!-- Kotlin-Formatierung via ktlint -->
@@ -240,6 +228,33 @@
           </execution>
         </executions>
       </plugin>
+
+<plugin>
+  <groupId>com.github.ozsie</groupId>
+  <artifactId>detekt-maven-plugin</artifactId>
+  <version>1.23.8</version>
+
+  <executions>
+    <execution>
+      <id>detekt</id>
+      <phase>verify</phase>
+      <goals>
+        <goal>check</goal>
+      </goals>
+    </execution>
+  </executions>
+
+  <configuration>
+    <!-- Kommagetrennte Ordnerliste statt <param>-Kindern -->
+    <input>${project.basedir}/src/main/kotlin,${project.basedir}/src/test/kotlin</input>
+
+    <!-- unsere detekt.yml im Projekt-Root -->
+    <config>${project.basedir}/detekt.yml</config>
+
+    <!-- bei Findings Build fehlschlagen lassen -->
+    <failOnError>true</failOnError>
+  </configuration>
+</plugin>
 
     </plugins>
 

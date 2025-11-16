@@ -29,15 +29,45 @@ class AdventControllerTest
         private val env: Environment,
     ) {
 
+        companion object {
+            private const val ADVENT_YEAR = 2025
+            private const val ADVENT_MONTH_VALUE = 12
+
+            private const val FIRST_DAY = 1
+            private const val LAST_DAY = 24
+
+            private const val INVALID_DAY_LOW = 0
+            private const val INVALID_DAY_HIGH = 25
+
+            private const val ADVENT_FIRST_DAY = 1
+            private const val ADVENT_LAST_DAY = 24
+
+            private const val ZONE_ID_EUROPE_BERLIN = "Europe/Berlin"
+
+            private const val BASE_API_PATH = "/api/advent"
+            private const val DAYS_ENDPOINT = "$BASE_API_PATH/days"
+
+            private const val PROP_FIXED_TODAY = "advent.fixed-today"
+
+            private const val ERROR_FIELD = "error"
+            private const val ERROR_NOT_FOUND = "not found"
+            private const val ERROR_LOCKED = "locked"
+
+            private const val DOOR_IMAGE_PATTERN = "/images/doors/day-%02d.png"
+            private val DOOR_IMAGE_REGEX = Regex("""^/images/doors/day-\d{2}\.png$""")
+
+            private const val TITLE_PREFIX = "Türchen "
+        }
+
         // kleines DTO für Fehlerantworten wie {"error":"locked"}
         data class ErrorResponse(val error: String?)
 
         private fun currentDateForTest(): LocalDate {
-            val fixed = env.getProperty("advent.fixed-today")
+            val fixed = env.getProperty(PROP_FIXED_TODAY)
             return if (!fixed.isNullOrBlank()) {
                 LocalDate.parse(fixed)
             } else {
-                LocalDate.now(ZoneId.of("Europe/Berlin"))
+                LocalDate.now(ZoneId.of(ZONE_ID_EUROPE_BERLIN))
             }
         }
 
@@ -50,29 +80,29 @@ class AdventControllerTest
 
         @Test
         fun `GET days returns 24 items from 1 to 24`() {
-            val json = getBody("/api/advent/days")
+            val json = getBody(DAYS_ENDPOINT)
             val days: List<AdventDayDto> = jsonMapper.readValue(json)
 
-            assertEquals(24, days.size, "es sollten 24 Türchen zurückkommen")
-            assertEquals((1..24).toList(), days.map { it.day }, "Tage sollten 1..24 sein")
+            assertEquals(LAST_DAY, days.size, "es sollten 24 Türchen zurückkommen")
+            assertEquals((FIRST_DAY..LAST_DAY).toList(), days.map { it.day }, "Tage sollten 1..24 sein")
         }
 
         @Test
         fun `days have correct dates and titles`() {
-            val json = getBody("/api/advent/days")
+            val json = getBody(DAYS_ENDPOINT)
             val days: List<AdventDayDto> = jsonMapper.readValue(json)
 
             days.forEach { dto ->
-                assertEquals(2025, dto.date.year)
-                assertEquals(12, dto.date.monthValue)
+                assertEquals(ADVENT_YEAR, dto.date.year)
+                assertEquals(ADVENT_MONTH_VALUE, dto.date.monthValue)
                 assertEquals(dto.day, dto.date.dayOfMonth)
-                assertEquals("Türchen ${dto.day}", dto.title)
+                assertEquals("$TITLE_PREFIX${dto.day}", dto.title)
             }
         }
 
         @Test
         fun `days unlocked flag follows the business rule`() {
-            val json = getBody("/api/advent/days")
+            val json = getBody(DAYS_ENDPOINT)
             val days: List<AdventDayDto> = jsonMapper.readValue(json)
 
             val today = currentDateForTest()
@@ -89,7 +119,7 @@ class AdventControllerTest
 
         @Test
         fun `solutionUnlocked follows the business rule`() {
-            val json = getBody("/api/advent/days")
+            val json = getBody(DAYS_ENDPOINT)
             val days: List<AdventDayDto> = jsonMapper.readValue(json)
 
             val today = currentDateForTest() // liest advent.fixed-today oder LocalDate.now
@@ -108,10 +138,10 @@ class AdventControllerTest
         fun `GET one sets solutionUnlocked only after day`() {
             val today = currentDateForTest()
 
-            // nur testen, wenn wir vor dem 01.12. sind
-            val date = LocalDate.of(2025, 12, 1)
+            // nur testen, wenn wir vor oder am 01.12. sind
+            val date = LocalDate.of(ADVENT_YEAR, ADVENT_MONTH_VALUE, FIRST_DAY)
             if (today.isBefore(date) || today.isEqual(date)) {
-                val body = getBody("/api/advent/days/1")
+                val body = getBody("$DAYS_ENDPOINT/$ADVENT_FIRST_DAY")
                 val dto: AdventDayDto = jsonMapper.readValue(body)
                 assertTrue(dto.unlocked)
                 assertFalse(dto.solutionUnlocked)
@@ -120,11 +150,11 @@ class AdventControllerTest
 
         @Test
         fun `imageUrl uses per-day door icons`() {
-            val json = getBody("/api/advent/days")
+            val json = getBody(DAYS_ENDPOINT)
             val days: List<AdventDayDto> = jsonMapper.readValue(json)
 
             days.forEach { dto ->
-                val expected = "/images/doors/day-%02d.png".format(dto.day)
+                val expected = DOOR_IMAGE_PATTERN.format(dto.day)
                 assertEquals(
                     expected,
                     dto.imageUrl,
@@ -135,14 +165,12 @@ class AdventControllerTest
 
         @Test
         fun `imageUrl has correct door path pattern`() {
-            val json = getBody("/api/advent/days")
+            val json = getBody(DAYS_ENDPOINT)
             val days: List<AdventDayDto> = jsonMapper.readValue(json)
-
-            val regex = Regex("""^/images/doors/day-\d{2}\.png$""")
 
             days.forEach { dto ->
                 assertTrue(
-                    dto.imageUrl != null && regex.matches(dto.imageUrl!!),
+                    dto.imageUrl != null && DOOR_IMAGE_REGEX.matches(dto.imageUrl!!),
                     "imageUrl hat nicht das erwartete Format für Tag ${dto.day}: ${dto.imageUrl}",
                 )
             }
@@ -150,18 +178,18 @@ class AdventControllerTest
 
         @Test
         fun `GET one returns not-found error for invalid day`() {
-            mockMvc.perform(get("/api/advent/days/0"))
+            mockMvc.perform(get("$DAYS_ENDPOINT/$INVALID_DAY_LOW"))
                 .andExpect(status().isOk) // Controller liefert Map, kein HTTP-404
-                .andExpect(jsonPath("$.error").value("not found"))
+                .andExpect(jsonPath("$.${ERROR_FIELD}").value(ERROR_NOT_FOUND))
 
-            mockMvc.perform(get("/api/advent/days/25"))
+            mockMvc.perform(get("$DAYS_ENDPOINT/$INVALID_DAY_HIGH"))
                 .andExpect(status().isOk)
-                .andExpect(jsonPath("$.error").value("not found"))
+                .andExpect(jsonPath("$.${ERROR_FIELD}").value(ERROR_NOT_FOUND))
         }
 
         @Test
         fun `GET one for day 1 returns either locked error or AdventDayDto`() {
-            val body = getBody("/api/advent/days/1")
+            val body = getBody("$DAYS_ENDPOINT/$ADVENT_FIRST_DAY")
 
             // Erst versuchen wir, ob es eine Fehler-Response ist
             val errorResponse = runCatching {
@@ -170,27 +198,27 @@ class AdventControllerTest
 
             if (errorResponse?.error != null) {
                 assertEquals(
-                    "locked",
+                    ERROR_LOCKED,
                     errorResponse.error,
                     "Tag 1 darf nur 'locked' als Fehler haben",
                 )
             } else {
                 // Dann muss es ein valides AdventDayDto sein
                 val dto: AdventDayDto = jsonMapper.readValue(body)
-                assertEquals(1, dto.day)
-                assertEquals("Türchen 1", dto.title)
+                assertEquals(ADVENT_FIRST_DAY, dto.day)
+                assertEquals("$TITLE_PREFIX$ADVENT_FIRST_DAY", dto.title)
             }
         }
 
         @Test
         fun `GET one future day returns locked error (solange vor 24_12_2025 ausgeführt)`() {
-            val today = LocalDate.now(ZoneId.of("Europe/Berlin"))
-            val futureDate = LocalDate.of(2025, 12, 24)
+            val today = LocalDate.now(ZoneId.of(ZONE_ID_EUROPE_BERLIN))
+            val futureDate = LocalDate.of(ADVENT_YEAR, ADVENT_MONTH_VALUE, ADVENT_LAST_DAY)
 
             if (today.isBefore(futureDate)) {
-                mockMvc.perform(get("/api/advent/days/24"))
+                mockMvc.perform(get("$DAYS_ENDPOINT/$ADVENT_LAST_DAY"))
                     .andExpect(status().isOk)
-                    .andExpect(jsonPath("$.error").value("locked"))
+                    .andExpect(jsonPath("$.${ERROR_FIELD}").value(ERROR_LOCKED))
             }
         }
     }

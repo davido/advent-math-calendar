@@ -1,0 +1,61 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: true
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+processors:
+  active: true
+  exclude:
+    - 'DetektProgressListener'
+
+console-reports:
+  active: true
+  exclude:
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'NotificationReport'
+    - 'FileBasedFindingsReport'
+
+output-reports:
+  active: false
+  exclude: []
+
+comments:
+  active: true
+
+complexity:
+  active: true
+  LongMethod:
+    active: true
+  LongParameterList:
+    active: true
+  TooManyFunctions:
+    active: false
+
+coroutines:
+  active: true
+
+empty-blocks:
+  active: true
+
+exceptions:
+  active: true
+
+naming:
+  active: true
+
+performance:
+  active: true
+
+potential-bugs:
+  active: true
+
+style:
+  active: true
+  MagicNumber:
+    active: true
+  WildcardImport:
+    active: true
