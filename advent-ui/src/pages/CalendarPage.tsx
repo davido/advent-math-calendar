@@ -46,24 +46,22 @@ export default function CalendarPage() {
             const unlocked = d.unlocked;
             const solutionUnlocked = d.solutionUnlocked;
 
-            // Hintergrund- und Button-Zustände
             const isLocked = !unlocked;
             const isSolutionUnlocked = unlocked && solutionUnlocked;
+            const isUnlockedNoSolution = unlocked && !solutionUnlocked;
 
-            // Footer-Text
             const footerText = isLocked
               ? "Wartet auf den großen Tag ✨"
               : isSolutionUnlocked
                 ? "Die Lösung ist freigeschaltet ✅"
                 : "Türchen ist freigeschaltet ✨";
 
-            // Farben
             const bgLocked = "linear-gradient(180deg,#fafafa,#f0f0f0)";
-            const bgUnlockedSolution = "linear-gradient(180deg,#e8f5e9,#c8e6c9)"; // Grün
-            const bgUnlockedNoSolution = "linear-gradient(180deg,#fffde7,#fff9c4)"; // Gelb
+            const bgUnlockedSolution = "linear-gradient(180deg,#e8f5e9,#c8e6c9)";
+            const bgUnlockedNoSolution = "linear-gradient(180deg,#fffde7,#fff9c4)";
 
-            const boxShadowSolution = "0 0 12px rgba(27,94,32,0.35)"; // Grün
-            const boxShadowNoSolution = "0 0 12px rgba(255,193,7,0.35)"; // Gelb
+            const boxShadowSolution = "0 0 12px rgba(27,94,32,0.35)";
+            const boxShadowNoSolution = "0 0 12px rgba(255,193,7,0.35)";
 
             return (
               <Grid key={d.day} item xs={12} sm={6} md={4} lg={3}>
@@ -88,7 +86,7 @@ export default function CalendarPage() {
                   }}
                 >
                   <CardActionArea
-                    disabled={!unlocked}
+                    disabled={isLocked}
                     onClick={() => nav(`/door/${d.day}`)}
                     sx={{
                       display: "flex",
@@ -124,34 +122,32 @@ export default function CalendarPage() {
                         <Typography variant="h6" fontWeight={700}>
                           Tür {d.day}
                         </Typography>
+
+                        {/* Chip nutzt jetzt dieselben Farben wie der Button (warning/success) */}
                         <Chip
-                          color={unlocked ? "secondary" : "default"}
-                          label={unlocked ? "Freigeschaltet" : "Gesperrt"}
                           size="small"
+                          label={unlocked ? "Freigeschaltet" : "Gesperrt"}
+                          color={isLocked ? "default" : isSolutionUnlocked ? "success" : "warning"}
+                          variant={isLocked ? "outlined" : "filled"}
+                          sx={{
+                            fontWeight: 600,
+                          }}
                         />
                       </Stack>
+
                       <Typography variant="body2" color="text.secondary" mt={1}>
                         {new Date(d.date).toLocaleDateString("de-DE")}
                       </Typography>
                     </CardContent>
                   </CardActionArea>
 
-                  {/* Footer-Button */}
                   <Box sx={{ p: 1.5, pt: 0, textAlign: "center" }}>
                     <Button
                       fullWidth
                       size="small"
                       disabled={isLocked}
-                      variant={
-                        isLocked ? "outlined" : isSolutionUnlocked ? "contained" : "contained"
-                      }
-                      color={
-                        isLocked
-                          ? "inherit"
-                          : isSolutionUnlocked
-                            ? "success" // Grün
-                            : "warning" // Gelb!
-                      }
+                      variant={isLocked ? "outlined" : "contained"}
+                      color={isLocked ? "inherit" : isSolutionUnlocked ? "success" : "warning"}
                       sx={{
                         textTransform: "none",
                         whiteSpace: "normal",
