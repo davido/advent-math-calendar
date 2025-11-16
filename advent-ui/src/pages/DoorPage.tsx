@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, type DoorCard } from "../api";
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Stack,
-} from "@mui/material";
+import { Box, Paper, Typography, Button, Stack } from "@mui/material";
 import FestiveAppBar from "../components/FestiveAppBar";
 import Snowfall from "../components/Snowfall";
 import useBell from "../components/useBell";
+
+// API kann entweder DoorCard oder eine Fehler-Response liefern
+type DoorResponse = DoorCard | { error: string };
 
 export default function DoorPage() {
   const { day } = useParams();
@@ -19,11 +16,21 @@ export default function DoorPage() {
   const bell = useBell(0.7);
 
   useEffect(() => {
+    // Wenn kein :day in der URL, brechen wir einfach ab – kein setState nötig
+    if (!day) return;
+
     api
-      .get(`/advent/days/${day}`)
+      .get<DoorResponse>(`/advent/days/${day}`)
       .then((r) => {
-        if ((r.data as any)?.error) setDoor(null);
-        else setDoor(r.data as DoorCard);
+        const data = r.data;
+
+        if ("error" in data) {
+          // locked / not found → kein Türchen anzeigen
+          setDoor(null);
+        } else {
+          // gültiges Türchen
+          setDoor(data);
+        }
       })
       .catch(() => setDoor(null));
   }, [day]);
@@ -47,16 +54,11 @@ export default function DoorPage() {
           {door ? (
             <>
               <Typography variant="h5" fontWeight={700} gutterBottom>
-                Tür {door.day} –{" "}
-                {new Date(door.date).toLocaleDateString("de-DE")}
+                Tür {door.day} – {new Date(door.date).toLocaleDateString("de-DE")}
               </Typography>
               {door.imageUrl && (
                 <Box sx={{ textAlign: "center", mb: 2 }}>
-                  <img
-                    src={door.imageUrl}
-                    alt=""
-                    style={{ maxWidth: 240 }}
-                  />
+                  <img src={door.imageUrl} alt="" style={{ maxWidth: 240 }} />
                 </Box>
               )}
               <Stack direction="row" spacing={2}>

@@ -14,6 +14,6 @@ export default function useBell(volume = 0.6) {
         audio.current.play().catch(() => {});
       },
     }),
-    [volume]
+    [volume],
   );
 }

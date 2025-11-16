@@ -41,111 +41,105 @@ export default function CalendarPage() {
           Jeden Tag ein Türchen – Frohe Weihnachten! 🎁
         </Typography>
 
-<Grid container spacing={2}>
-  {days.map((d) => {
-    const unlocked = d.unlocked;
-    const solutionUnlocked = d.solutionUnlocked;
+        <Grid container spacing={2}>
+          {days.map((d) => {
+            const unlocked = d.unlocked;
+            const solutionUnlocked = d.solutionUnlocked;
 
-    const footerText = !unlocked
-      ? "Wartet auf den großen Tag ✨"
-      : solutionUnlocked
-        ? "Die Lösung ist freigeschaltet ✅"
-        : "Türchen ist freigeschaltet ✨";
+            const footerText = !unlocked
+              ? "Wartet auf den großen Tag ✨"
+              : solutionUnlocked
+                ? "Die Lösung ist freigeschaltet ✅"
+                : "Türchen ist freigeschaltet ✨";
 
-    return (
-      <Grid key={d.day} item xs={12} sm={6} md={4} lg={3}>
-        <Card
-          sx={{
-            border: "2px solid #c62828",
-            background: unlocked
-              ? "linear-gradient(180deg,#fff,#fff5f5)"
-              : "linear-gradient(180deg,#fafafa,#f0f0f0)",
-            boxShadow: unlocked
-              ? "0 0 12px rgba(27,94,32,0.35)"
-              : "none",
-            transition: "box-shadow .3s ease",
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-            minWidth: 0,
-          }}
-        >
-          <CardActionArea
-            disabled={!unlocked}
-            onClick={() => nav(`/door/${d.day}`)}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "stretch",
-              flexGrow: 1,
-            }}
-          >
-            {d.imageUrl ? (
-              <CardMedia
-                component="img"
-                image={d.imageUrl}
-                alt={`Tür ${d.day}`}
-                sx={{
-                  height: 160,
-                  objectFit: "cover",
-                  p: 2,
-                  background: "#fff",
-                }}
-              />
-            ) : (
-              <Box
-                sx={{
-                  height: 160,
-                  p: 2,
-                  background: "#fff",
-                }}
-              />
-            )}
+            return (
+              <Grid key={d.day} item xs={12} sm={6} md={4} lg={3}>
+                <Card
+                  sx={{
+                    border: "2px solid #c62828",
+                    background: unlocked
+                      ? "linear-gradient(180deg,#fff,#fff5f5)"
+                      : "linear-gradient(180deg,#fafafa,#f0f0f0)",
+                    boxShadow: unlocked ? "0 0 12px rgba(27,94,32,0.35)" : "none",
+                    transition: "box-shadow .3s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    minWidth: 0,
+                  }}
+                >
+                  <CardActionArea
+                    disabled={!unlocked}
+                    onClick={() => nav(`/door/${d.day}`)}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "stretch",
+                      flexGrow: 1,
+                    }}
+                  >
+                    {d.imageUrl ? (
+                      <CardMedia
+                        component="img"
+                        image={d.imageUrl}
+                        alt={`Tür ${d.day}`}
+                        sx={{
+                          height: 160,
+                          objectFit: "cover",
+                          p: 2,
+                          background: "#fff",
+                        }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          height: 160,
+                          p: 2,
+                          background: "#fff",
+                        }}
+                      />
+                    )}
 
-            <CardContent sx={{ flexGrow: 1 }}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Typography variant="h6" fontWeight={700}>
-                  Tür {d.day}
-                </Typography>
-                <Chip
-                  color={unlocked ? "secondary" : "default"}
-                  label={unlocked ? "Freigeschaltet" : "Gesperrt"}
-                  size="small"
-                />
-              </Stack>
-              <Typography variant="body2" color="text.secondary" mt={1}>
-                {new Date(d.date).toLocaleDateString("de-DE")}
-              </Typography>
-            </CardContent>
-          </CardActionArea>
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6" fontWeight={700}>
+                          Tür {d.day}
+                        </Typography>
+                        <Chip
+                          color={unlocked ? "secondary" : "default"}
+                          label={unlocked ? "Freigeschaltet" : "Gesperrt"}
+                          size="small"
+                        />
+                      </Stack>
+                      <Typography variant="body2" color="text.secondary" mt={1}>
+                        {new Date(d.date).toLocaleDateString("de-DE")}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
 
-          <Box sx={{ p: 1.5, pt: 0, textAlign: "center" }}>
-            <Button
-              fullWidth
-              size="small"
-              variant={unlocked ? "contained" : "outlined"}
-              color={unlocked ? "success" : "inherit"}
-              disabled={!unlocked}
-              sx={{
-                textTransform: "none",
-                whiteSpace: "normal",
-                lineHeight: 1.2,
-                fontSize: "0.75rem",
-                py: 0.5,
-              }}
-            >
-              {footerText}
-            </Button>
-          </Box>
-        </Card>
-      </Grid>
-    );
-  })}
-</Grid>
+                  <Box sx={{ p: 1.5, pt: 0, textAlign: "center" }}>
+                    <Button
+                      fullWidth
+                      size="small"
+                      variant={unlocked ? "contained" : "outlined"}
+                      color={unlocked ? "success" : "inherit"}
+                      disabled={!unlocked}
+                      sx={{
+                        textTransform: "none",
+                        whiteSpace: "normal",
+                        lineHeight: 1.2,
+                        fontSize: "0.75rem",
+                        py: 0.5,
+                      }}
+                    >
+                      {footerText}
+                    </Button>
+                  </Box>
+                </Card>
+              </Grid>
+            );
+          })}
+        </Grid>
       </Box>
       <Snowfall density={90} speed={0.7} opacity={0.9} zIndex={9999} />
     </>

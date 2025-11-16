@@ -1,24 +1,24 @@
 import { useEffect, useRef } from "react";
 
 type SnowfallProps = {
-  density?: number;  // Basis-Anzahl Flocken (wird auf 2 Layer verteilt)
-  speed?: number;    // Basisgeschwindigkeit
-  opacity?: number;  // Maximal-Deckkraft
+  density?: number; // Basis-Anzahl Flocken (wird auf 2 Layer verteilt)
+  speed?: number; // Basisgeschwindigkeit
+  opacity?: number; // Maximal-Deckkraft
   zIndex?: number;
 };
 
 type Flake = {
   x: number;
   y: number;
-  r: number;              // "Größe" der Flocke
+  r: number; // "Größe" der Flocke
   vx: number;
   vy: number;
-  a: number;              // Phase für horizontales Wackeln
-  aa: number;             // Winkel-Geschwindigkeit
-  alpha: number;          // individuelle Deckkraft
-  layer: 0 | 1;           // 0 = Hintergrund, 1 = Vordergrund
-  rot: number;            // Rotation
-  rotSpeed: number;       // Rotationsgeschwindigkeit
+  a: number; // Phase für horizontales Wackeln
+  aa: number; // Winkel-Geschwindigkeit
+  alpha: number; // individuelle Deckkraft
+  layer: 0 | 1; // 0 = Hintergrund, 1 = Vordergrund
+  rot: number; // Rotation
+  rotSpeed: number; // Rotationsgeschwindigkeit
 };
 
 export default function Snowfall({
@@ -63,9 +63,7 @@ export default function Snowfall({
         vy: (Math.random() * speed + 0.2) * (layer === 0 ? 0.5 : 1.0),
         a: Math.random() * Math.PI * 2,
         aa: Math.random() * 0.015 + 0.003,
-        alpha:
-          (Math.random() * (opacity - 0.3) + 0.3) *
-          (layer === 0 ? 0.7 : 1.0), // Hintergrund etwas transparenter
+        alpha: (Math.random() * (opacity - 0.3) + 0.3) * (layer === 0 ? 0.7 : 1.0), // Hintergrund etwas transparenter
         layer,
         rot: Math.random() * Math.PI * 2,
         rotSpeed: (Math.random() - 0.5) * 0.01,
