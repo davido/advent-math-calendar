@@ -229,32 +229,32 @@
         </executions>
       </plugin>
 
-<plugin>
-  <groupId>com.github.ozsie</groupId>
-  <artifactId>detekt-maven-plugin</artifactId>
-  <version>1.23.8</version>
+      <plugin>
+        <groupId>com.github.ozsie</groupId>
+        <artifactId>detekt-maven-plugin</artifactId>
+        <version>1.23.8</version>
 
-  <executions>
-    <execution>
-      <id>detekt</id>
-      <phase>verify</phase>
-      <goals>
-        <goal>check</goal>
-      </goals>
-    </execution>
-  </executions>
+        <configuration>
+          <!-- Kommagetrennte Ordnerliste statt <param>-Kindern -->
+          <input>${project.basedir}/src/main/kotlin,${project.basedir}/src/test/kotlin</input>
 
-  <configuration>
-    <!-- Kommagetrennte Ordnerliste statt <param>-Kindern -->
-    <input>${project.basedir}/src/main/kotlin,${project.basedir}/src/test/kotlin</input>
+          <!-- unsere detekt.yml im Projekt-Root -->
+          <config>${project.basedir}/detekt.yml</config>
 
-    <!-- unsere detekt.yml im Projekt-Root -->
-    <config>${project.basedir}/detekt.yml</config>
+          <!-- bei Findings Build fehlschlagen lassen -->
+          <failOnError>true</failOnError>
+        </configuration>
 
-    <!-- bei Findings Build fehlschlagen lassen -->
-    <failOnError>true</failOnError>
-  </configuration>
-</plugin>
+        <executions>
+          <execution>
+            <id>detekt</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
 
     </plugins>
 

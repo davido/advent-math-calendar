@@ -25,7 +25,6 @@ data class AdventDayDto(
 class AdventController(
     @param:Value("\${advent.fixed-today:}") private val fixedTodayRaw: String?,
 ) {
-
     companion object {
         private const val ADVENT_YEAR = 2025
         private val ADVENT_MONTH: Month = Month.DECEMBER
@@ -54,17 +53,13 @@ class AdventController(
         fixedTodayRaw?.takeIf { it.isNotBlank() }?.let { LocalDate.parse(it) }
             ?: LocalDate.now(zoneId)
 
-    private fun imageUrlFor(day: Int): String =
-        DOOR_IMAGE_PATTERN.format(day)
+    private fun imageUrlFor(day: Int): String = DOOR_IMAGE_PATTERN.format(day)
 
-    private fun taskUrlFor(day: Int): String =
-        TASK_URL_PATTERN.format(day)
+    private fun taskUrlFor(day: Int): String = TASK_URL_PATTERN.format(day)
 
-    private fun solutionUrlFor(day: Int): String =
-        SOLUTION_URL_PATTERN.format(day)
+    private fun solutionUrlFor(day: Int): String = SOLUTION_URL_PATTERN.format(day)
 
-    private fun titleFor(day: Int): String =
-        "$TITLE_PREFIX$day"
+    private fun titleFor(day: Int): String = "$TITLE_PREFIX$day"
 
     @GetMapping("/days")
     fun days(): List<AdventDayDto> {

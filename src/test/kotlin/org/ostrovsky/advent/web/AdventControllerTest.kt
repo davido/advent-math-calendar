@@ -28,7 +28,6 @@ class AdventControllerTest
         private val jsonMapper: JsonMapper,
         private val env: Environment,
     ) {
-
         companion object {
             private const val ADVENT_YEAR = 2025
             private const val ADVENT_MONTH_VALUE = 12
@@ -192,9 +191,10 @@ class AdventControllerTest
             val body = getBody("$DAYS_ENDPOINT/$ADVENT_FIRST_DAY")
 
             // Erst versuchen wir, ob es eine Fehler-Response ist
-            val errorResponse = runCatching {
-                jsonMapper.readValue<ErrorResponse>(body)
-            }.getOrNull()
+            val errorResponse =
+                runCatching {
+                    jsonMapper.readValue<ErrorResponse>(body)
+                }.getOrNull()
 
             if (errorResponse?.error != null) {
                 assertEquals(
