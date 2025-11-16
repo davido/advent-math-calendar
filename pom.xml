@@ -268,7 +268,7 @@
           <config>${project.basedir}/detekt.yml</config>
 
           <!-- bei Findings Build fehlschlagen lassen -->
-          <failOnError>true</failOnError>
+          <failBuild>true</failBuild>
         </configuration>
 
         <executions>
