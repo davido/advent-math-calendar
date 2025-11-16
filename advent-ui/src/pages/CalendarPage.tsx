@@ -46,21 +46,40 @@ export default function CalendarPage() {
             const unlocked = d.unlocked;
             const solutionUnlocked = d.solutionUnlocked;
 
-            const footerText = !unlocked
+            // Hintergrund- und Button-Zustände
+            const isLocked = !unlocked;
+            const isSolutionUnlocked = unlocked && solutionUnlocked;
+
+            // Footer-Text
+            const footerText = isLocked
               ? "Wartet auf den großen Tag ✨"
-              : solutionUnlocked
+              : isSolutionUnlocked
                 ? "Die Lösung ist freigeschaltet ✅"
                 : "Türchen ist freigeschaltet ✨";
+
+            // Farben
+            const bgLocked = "linear-gradient(180deg,#fafafa,#f0f0f0)";
+            const bgUnlockedSolution = "linear-gradient(180deg,#e8f5e9,#c8e6c9)"; // Grün
+            const bgUnlockedNoSolution = "linear-gradient(180deg,#fffde7,#fff9c4)"; // Gelb
+
+            const boxShadowSolution = "0 0 12px rgba(27,94,32,0.35)"; // Grün
+            const boxShadowNoSolution = "0 0 12px rgba(255,193,7,0.35)"; // Gelb
 
             return (
               <Grid key={d.day} item xs={12} sm={6} md={4} lg={3}>
                 <Card
                   sx={{
                     border: "2px solid #c62828",
-                    background: unlocked
-                      ? "linear-gradient(180deg,#fff,#fff5f5)"
-                      : "linear-gradient(180deg,#fafafa,#f0f0f0)",
-                    boxShadow: unlocked ? "0 0 12px rgba(27,94,32,0.35)" : "none",
+                    background: isLocked
+                      ? bgLocked
+                      : isSolutionUnlocked
+                        ? bgUnlockedSolution
+                        : bgUnlockedNoSolution,
+                    boxShadow: isLocked
+                      ? "none"
+                      : isSolutionUnlocked
+                        ? boxShadowSolution
+                        : boxShadowNoSolution,
                     transition: "box-shadow .3s ease",
                     display: "flex",
                     flexDirection: "column",
@@ -117,13 +136,22 @@ export default function CalendarPage() {
                     </CardContent>
                   </CardActionArea>
 
+                  {/* Footer-Button */}
                   <Box sx={{ p: 1.5, pt: 0, textAlign: "center" }}>
                     <Button
                       fullWidth
                       size="small"
-                      variant={unlocked ? "contained" : "outlined"}
-                      color={unlocked ? "success" : "inherit"}
-                      disabled={!unlocked}
+                      disabled={isLocked}
+                      variant={
+                        isLocked ? "outlined" : isSolutionUnlocked ? "contained" : "contained"
+                      }
+                      color={
+                        isLocked
+                          ? "inherit"
+                          : isSolutionUnlocked
+                            ? "success" // Grün
+                            : "warning" // Gelb!
+                      }
                       sx={{
                         textTransform: "none",
                         whiteSpace: "normal",
