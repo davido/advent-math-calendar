@@ -34,7 +34,7 @@ export default function FestiveAppBar() {
     >
       <Toolbar>
         <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: 700 }}>
-          🎄 Adventskalender
+          🎄 Adventskalender 2025
         </Typography>
 
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mr: 2 }}>
