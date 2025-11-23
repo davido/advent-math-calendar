@@ -48,7 +48,6 @@ export default function CalendarPage() {
 
             const isLocked = !unlocked;
             const isSolutionUnlocked = unlocked && solutionUnlocked;
-            const isUnlockedNoSolution = unlocked && !solutionUnlocked;
 
             const footerText = isLocked
               ? "Wartet auf den großen Tag ✨"
