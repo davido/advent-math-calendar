@@ -32,7 +32,7 @@ export default function ProfileSelectPage() {
             Welchen Adventskalender möchtest du öffnen? 🎄
           </Typography>
           <Typography variant="body1" sx={{ mb: 3 }}>
-            Wähle einen Kalender mit dem passenden Schwierigkeitsgrad.
+            Wähle Deinen Adventskalender.
           </Typography>
 
           <Stack spacing={2}>
