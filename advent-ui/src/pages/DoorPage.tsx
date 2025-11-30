@@ -5,35 +5,42 @@ import { Box, Paper, Typography, Button, Stack } from "@mui/material";
 import FestiveAppBar from "../components/FestiveAppBar";
 import Snowfall from "../components/Snowfall";
 import useBell from "../components/useBell";
+import { isProfileSlug, PROFILES } from "../profiles";
 
-// API kann entweder DoorCard oder eine Fehler-Response liefern
 type DoorResponse = DoorCard | { error: string };
 
 export default function DoorPage() {
-  const { day } = useParams();
+  const { day, slug } = useParams();
   const [door, setDoor] = useState<DoorCard | null>(null);
   const nav = useNavigate();
   const bell = useBell(0.7);
 
   useEffect(() => {
-    // Wenn kein :day in der URL, brechen wir einfach ab – kein setState nötig
+    if (!slug || !isProfileSlug(slug)) {
+      nav("/", { replace: true });
+      return;
+    }
     if (!day) return;
 
     api
-      .get<DoorResponse>(`/advent/days/${day}`)
+      .get<DoorResponse>(`/advent/${slug}/days/${day}`)
       .then((r) => {
         const data = r.data;
 
         if ("error" in data) {
-          // locked / not found → kein Türchen anzeigen
           setDoor(null);
         } else {
-          // gültiges Türchen
           setDoor(data);
         }
       })
       .catch(() => setDoor(null));
-  }, [day]);
+  }, [day, slug, nav]);
+
+  if (!slug || !isProfileSlug(slug)) {
+    return null;
+  }
+
+  const profile = PROFILES[slug];
 
   return (
     <>
@@ -41,8 +48,8 @@ export default function DoorPage() {
       <Snowfall density={80} speed={0.6} opacity={0.5} zIndex={0} />
 
       <Box sx={{ p: 3, position: "relative", zIndex: 1 }}>
-        <Button variant="outlined" onClick={() => nav("/calendar")}>
-          ← Zurück
+        <Button variant="outlined" onClick={() => nav(`/${slug}`)}>
+          ← Zurück zum Kalender ({profile.label})
         </Button>
         <Paper
           sx={{
@@ -54,7 +61,7 @@ export default function DoorPage() {
           {door ? (
             <>
               <Typography variant="h5" fontWeight={700} gutterBottom>
-                Tür {door.day} – {new Date(door.date).toLocaleDateString("de-DE")}
+                {profile.label}: Tür {door.day} – {new Date(door.date).toLocaleDateString("de-DE")}
               </Typography>
               {door.imageUrl && (
                 <Box sx={{ textAlign: "center", mb: 2 }}>

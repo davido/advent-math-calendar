@@ -43,8 +43,11 @@ class AdventControllerTest
 
             private const val ZONE_ID_EUROPE_BERLIN = "Europe/Berlin"
 
+            // 👇 wir testen jetzt ein konkretes Profil: momo (light)
+            private const val PROFILE_SLUG = "momo"
+
             private const val BASE_API_PATH = "/api/advent"
-            private const val DAYS_ENDPOINT = "$BASE_API_PATH/days"
+            private const val DAYS_ENDPOINT = "$BASE_API_PATH/$PROFILE_SLUG/days"
 
             private const val PROP_FIXED_TODAY = "advent.fixed-today"
 
@@ -121,7 +124,7 @@ class AdventControllerTest
             val json = getBody(DAYS_ENDPOINT)
             val days: List<AdventDayDto> = jsonMapper.readValue(json)
 
-            val today = currentDateForTest() // liest advent.fixed-today oder LocalDate.now
+            val today = currentDateForTest()
 
             days.forEach { dto ->
                 val expected = today.isAfter(dto.date)
@@ -137,7 +140,6 @@ class AdventControllerTest
         fun `GET one sets solutionUnlocked only after day`() {
             val today = currentDateForTest()
 
-            // nur testen, wenn wir vor oder am 01.12. sind
             val date = LocalDate.of(ADVENT_YEAR, ADVENT_MONTH_VALUE, FIRST_DAY)
             if (today.isBefore(date) || today.isEqual(date)) {
                 val body = getBody("$DAYS_ENDPOINT/$ADVENT_FIRST_DAY")
@@ -178,7 +180,7 @@ class AdventControllerTest
         @Test
         fun `GET one returns not-found error for invalid day`() {
             mockMvc.perform(get("$DAYS_ENDPOINT/$INVALID_DAY_LOW"))
-                .andExpect(status().isOk) // Controller liefert Map, kein HTTP-404
+                .andExpect(status().isOk)
                 .andExpect(jsonPath("$.${ERROR_FIELD}").value(ERROR_NOT_FOUND))
 
             mockMvc.perform(get("$DAYS_ENDPOINT/$INVALID_DAY_HIGH"))
@@ -190,7 +192,6 @@ class AdventControllerTest
         fun `GET one for day 1 returns either locked error or AdventDayDto`() {
             val body = getBody("$DAYS_ENDPOINT/$ADVENT_FIRST_DAY")
 
-            // Erst versuchen wir, ob es eine Fehler-Response ist
             val errorResponse =
                 runCatching {
                     jsonMapper.readValue<ErrorResponse>(body)
@@ -203,7 +204,6 @@ class AdventControllerTest
                     "Tag 1 darf nur 'locked' als Fehler haben",
                 )
             } else {
-                // Dann muss es ein valides AdventDayDto sein
                 val dto: AdventDayDto = jsonMapper.readValue(body)
                 assertEquals(ADVENT_FIRST_DAY, dto.day)
                 assertEquals("$TITLE_PREFIX$ADVENT_FIRST_DAY", dto.title)
@@ -220,5 +220,11 @@ class AdventControllerTest
                     .andExpect(status().isOk)
                     .andExpect(jsonPath("$.${ERROR_FIELD}").value(ERROR_LOCKED))
             }
+        }
+
+        @Test
+        fun `GET days with invalid profile returns 404`() {
+            mockMvc.perform(get("$BASE_API_PATH/unknownProfile/days"))
+                .andExpect(status().isNotFound)
         }
     }

@@ -1,5 +1,7 @@
 import { AppBar, Toolbar, Typography, Box, Stack, Chip } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { PROFILES, isProfileSlug } from "../profiles";
 
 function useXmasCountdown(target = new Date("2025-12-24T00:00:00+01:00")) {
   const [now, setNow] = useState(Date.now());
@@ -22,6 +24,12 @@ function useXmasCountdown(target = new Date("2025-12-24T00:00:00+01:00")) {
 export default function FestiveAppBar() {
   const { days, hours, minutes, seconds, done } = useXmasCountdown();
 
+  // Profil aus URL ziehen
+  const params = useParams();
+  const slug = params.slug;
+
+  const profile = slug && isProfileSlug(slug) ? PROFILES[slug] : null;
+
   return (
     <AppBar
       position="sticky"
@@ -37,10 +45,24 @@ export default function FestiveAppBar() {
           🎄 Adventskalender 2025
         </Typography>
 
+        {/* Profil-Chip anzeigen, wenn wir in einem Profil sind */}
+        {profile && (
+          <Chip
+            label={profile.label}
+            color="info"
+            variant="outlined"
+            sx={{
+              fontWeight: 700,
+              mr: 2,
+              borderWidth: 2,
+            }}
+          />
+        )}
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mr: 2 }}>
           <Typography variant="body2" sx={{ fontWeight: 700 }}>
             {done ? "Frohe Weihnachten!" : "Countdown:"}
           </Typography>
+
           {!done && (
             <Chip
               size="small"

@@ -14,15 +14,32 @@ import {
 } from "@mui/material";
 import FestiveAppBar from "../components/FestiveAppBar";
 import Snowfall from "../components/Snowfall";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { isProfileSlug, PROFILES } from "../profiles";
 
 export default function CalendarPage() {
   const [days, setDays] = useState<DoorCard[]>([]);
   const nav = useNavigate();
+  const { slug } = useParams();
+
+  // Falls jemand z.B. /irgendwas aufruft → zurück zur Auswahlseite
+  useEffect(() => {
+    if (!slug || !isProfileSlug(slug)) {
+      nav("/", { replace: true });
+    }
+  }, [slug, nav]);
 
   useEffect(() => {
-    api.get<DoorCard[]>("/advent/days").then((r) => setDays(r.data));
-  }, []);
+    if (!slug || !isProfileSlug(slug)) return;
+
+    api.get<DoorCard[]>(`/advent/${slug}/days`).then((r) => setDays(r.data));
+  }, [slug]);
+
+  if (!slug || !isProfileSlug(slug)) {
+    return null; // während Redirect
+  }
+
+  const profile = PROFILES[slug];
 
   return (
     <>
@@ -38,7 +55,7 @@ export default function CalendarPage() {
         }}
       >
         <Typography variant="h4" gutterBottom fontWeight={700}>
-          Jeden Tag ein Türchen – Frohe Weihnachten! 🎁
+          {profile.label}: Jeden Tag ein Türchen – Frohe Weihnachten! 🎁
         </Typography>
 
         <Grid container spacing={2}>
@@ -86,7 +103,7 @@ export default function CalendarPage() {
                 >
                   <CardActionArea
                     disabled={isLocked}
-                    onClick={() => nav(`/door/${d.day}`)}
+                    onClick={() => nav(`/${slug}/door/${d.day}`)}
                     sx={{
                       display: "flex",
                       flexDirection: "column",
@@ -100,7 +117,7 @@ export default function CalendarPage() {
                         image={d.imageUrl}
                         alt={`Tür ${d.day}`}
                         sx={{
-                          height: 160,
+                          height: 120,
                           objectFit: "cover",
                           p: 2,
                           background: "#fff",
@@ -122,7 +139,6 @@ export default function CalendarPage() {
                           Tür {d.day}
                         </Typography>
 
-                        {/* Chip nutzt jetzt dieselben Farben wie der Button (warning/success) */}
                         <Chip
                           size="small"
                           label={unlocked ? "Freigeschaltet" : "Gesperrt"}
