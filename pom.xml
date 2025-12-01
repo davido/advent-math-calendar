@@ -189,7 +189,7 @@
       <!-- Kopiere React dist/ nach Spring static/ -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>3.4.0</version>
         <executions>
           <execution>
             <id>copy-frontend</id>
