@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
   </parent>
 
   <groupId>org.ostrovsky</groupId>
@@ -17,7 +17,7 @@
 
   <properties>
     <java.version>25</java.version>
-    <kotlin.version>2.3.0</kotlin.version>
+    <kotlin.version>2.3.10</kotlin.version>
 
     <!-- Frontend -->
     <skip.frontend>false</skip.frontend>
